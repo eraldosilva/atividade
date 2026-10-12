@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Atividades da semana</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{
+  --bg:#f3f6f4;--card:#fff;--ink:#1d2b27;--mute:#64756f;--line:#d9e2de;--accent:#1f6f5c;--accent-ink:#fff;
+  --todo:#b7791f;--todo-bg:#fdf3dc;--doing:#2b6cb0;--doing-bg:#e1edfa;--done:#2f855a;--done-bg:#dff3e6;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a18;--card:#1d2623;--ink:#e6eeea;--mute:#98a9a2;--line:#2e3b37;--accent:#4fb89c;--accent-ink:#0e1a16;
+  --todo:#f0c060;--todo-bg:#3a3018;--doing:#7db4ee;--doing-bg:#1c2e44;--done:#6fd09b;--done-bg:#1b3527}}
+:root[data-theme="dark"]{
+  --bg:#141a18;--card:#1d2623;--ink:#e6eeea;--mute:#98a9a2;--line:#2e3b37;--accent:#4fb89c;--accent-ink:#0e1a16;
+  --todo:#f0c060;--todo-bg:#3a3018;--doing:#7db4ee;--doing-bg:#1c2e44;--done:#6fd09b;--done-bg:#1b3527}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 1.7rem/1.2 Georgia,"Times New Roman",serif;margin:8px 0 2px}
+.sub{color:var(--mute);margin:0 0 18px}
+form{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px;grid-template-columns:1fr 1fr}
+form .full{grid-column:1/-1}
+label{display:grid;gap:4px;font-size:.85rem;color:var(--mute);font-weight:600}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+textarea{min-height:72px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:22px 0 10px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{padding:5px 12px;border-radius:99px;font-size:.88rem}
+.filters button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.count{color:var(--mute);font-size:.9rem}
+.day{margin:18px 0 6px;font-weight:700;font-size:.95rem;color:var(--mute);text-transform:capitalize}
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:start}
+.item p{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.item.done p{color:var(--mute);text-decoration:line-through}
+.meta{color:var(--mute);font-size:.85rem;margin-top:4px;overflow-wrap:anywhere}
+.rep{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:10px}
+.rep .row{display:flex;gap:8px;flex-wrap:wrap}
+.rep .row input{flex:1 1 220px;width:auto}
+.msg{color:var(--mute);font-size:.88rem;min-height:1.2em}
+.acts{display:flex;gap:6px;align-items:center}
+.acts select{width:auto;padding:5px 8px;font-size:.88rem;font-weight:600;border-radius:99px}
+.s-todo{background:var(--todo-bg);color:var(--todo)}.s-doing{background:var(--doing-bg);color:var(--doing)}.s-done{background:var(--done-bg);color:var(--done)}
+.icon{padding:5px 9px;font-size:.85rem}
+.empty{text-align:center;color:var(--mute);padding:28px 12px;border:1px dashed var(--line);border-radius:10px}
+@media (max-width:520px){form{grid-template-columns:1fr}.item{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Atividades da semana</h1>
+  <p class="sub">Registre o que você fez, com data, descrição e status.</p>
+
+  <form id="f">
+    <label>Data
+      <input type="date" id="data" required>
+    </label>
+    <label>Status
+      <select id="status">
+        <option value="pendente">Pendente</option>
+        <option value="andamento">Em andamento</option>
+        <option value="concluida">Concluída</option>
+      </select>
+    </label>
+    <label>Solicitante
+      <input type="text" id="solicitante" required placeholder="Quem pediu">
+    </label>
+    <label>Setor
+      <input type="text" id="setor" required placeholder="Ex.: Financeiro">
+    </label>
+    <label class="full">Descrição
+      <textarea id="desc" required placeholder="Ex.: Reunião com o cliente para alinhar o escopo"></textarea>
+    </label>
+    <div class="full"><button class="primary" type="submit" id="btn">Adicionar atividade</button>
+      <button type="button" id="cancel" hidden>Cancelar edição</button></div>
+  </form>
+
+  <section class="rep" aria-label="Arquivo CSV">
+    <label>Arquivo CSV das atividades
+      <span style="font-weight:400">Baixe a lista em CSV (abre no Excel e no Google Planilhas) ou carregue um CSV salvo antes.</span>
+    </label>
+    <div class="row">
+      <button type="button" class="primary" id="expCsv">Salvar em CSV</button>
+      <button type="button" id="impCsv">Carregar CSV</button>
+      <input type="file" id="fileCsv" accept=".csv,text/csv" hidden>
+    </div>
+    <div class="msg" id="msgCsv" role="status"></div>
+  </section>
+
+  <section class="rep" aria-label="Relatório para o gerente">
+    <label>Relatório para o gerente
+      <input type="email" id="gerente" placeholder="E-mail do gerente">
+    </label>
+    <div class="row">
+      <button type="button" class="primary" id="enviar">Criar e-mail com o relatório</button>
+      <button type="button" id="copiar">Copiar relatório</button>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+  </section>
+
+  <div class="bar">
+    <div class="filters" id="filters" role="group" aria-label="Filtrar por status"></div>
+    <span class="count" id="count"></span>
+  </div>
+  <div id="list"></div>
+</main>
+
+<script>
+const STATUS={pendente:"Pendente",andamento:"Em andamento",concluida:"Concluída"};
+const CLS={pendente:"s-todo",andamento:"s-doing",concluida:"s-done"};
+const KEY="atividades-semanais";
+let items=[],filter="todas",editId=null;
+
+try{items=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){items=[]}
+if(!Array.isArray(items))items=[];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}};
+const $=id=>document.getElementById(id);
+const hoje=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const fmt=iso=>new Date(iso+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"});
+$("data").value=hoje();
+
+$("f").addEventListener("submit",e=>{
+  e.preventDefault();
+  const data=$("data").value,desc=$("desc").value.trim(),status=$("status").value,solicitante=$("solicitante").value.trim(),setor=$("setor").value.trim();
+  if(!data||!desc)return;
+  if(editId){const it=items.find(i=>i.id===editId);if(it)Object.assign(it,{data,desc,status,solicitante,setor})}
+  else items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),data,desc,status,solicitante,setor});
+  save();resetForm();render();
+});
+$("cancel").onclick=resetForm;
+function resetForm(){editId=null;$("desc").value="";$("solicitante").value="";$("setor").value="";$("status").value="pendente";$("btn").textContent="Adicionar atividade";$("cancel").hidden=true}
+
+function render(){
+  const fl=$("filters");fl.innerHTML="";
+  [["todas","Todas"],...Object.entries(STATUS)].forEach(([k,v])=>{
+    const b=document.createElement("button");b.type="button";b.textContent=v;
+    b.setAttribute("aria-pressed",filter===k);b.onclick=()=>{filter=k;render()};fl.appendChild(b)});
+  const vis=items.filter(i=>filter==="todas"||i.status===filter).sort((a,b)=>a.data<b.data?-1:a.data>b.data?1:0);
+  $("count").textContent=vis.length+(vis.length===1?" atividade":" atividades");
+  const list=$("list");list.innerHTML="";
+  if(!vis.length){list.innerHTML='<div class="empty">Nenhuma atividade por aqui. Preencha o formulário para adicionar a primeira.</div>';return}
+  let last="";
+  vis.forEach(it=>{
+    if(it.data!==last){last=it.data;const h=document.createElement("div");h.className="day";h.textContent=fmt(it.data);list.appendChild(h)}
+    const el=document.createElement("div");el.className="item"+(it.status==="concluida"?" done":"");
+    const box=document.createElement("div");const p=document.createElement("p");p.textContent=it.desc;box.append(p);const metaTxt=[it.solicitante&&"Solicitante: "+it.solicitante,it.setor&&"Setor: "+it.setor].filter(Boolean).join("  |  ");if(metaTxt){const m=document.createElement("div");m.className="meta";m.textContent=metaTxt;box.append(m)}
+    const acts=document.createElement("div");acts.className="acts";
+    const sel=document.createElement("select");sel.setAttribute("aria-label","Status");sel.className=CLS[it.status];
+    Object.entries(STATUS).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v;if(k===it.status)o.selected=true;sel.appendChild(o)});
+    sel.onchange=()=>{it.status=sel.value;save();render()};
+    const ed=document.createElement("button");ed.className="icon";ed.textContent="Editar";
+    ed.onclick=()=>{editId=it.id;$("data").value=it.data;$("desc").value=it.desc;$("solicitante").value=it.solicitante||"";$("setor").value=it.setor||"";$("status").value=it.status;$("btn").textContent="Salvar alterações";$("cancel").hidden=false;$("desc").focus();window.scrollTo({top:0,behavior:"smooth"})};
+    const del=document.createElement("button");del.className="icon";del.textContent="Excluir";
+    del.onclick=()=>{if(confirm("Excluir esta atividade?")){items=items.filter(x=>x.id!==it.id);save();render()}};
+    acts.append(sel,ed,del);el.append(box,acts);list.appendChild(el);
+  });
+}
+try{$("gerente").value=localStorage.getItem(KEY+"-gerente")||""}catch(e){}
+$("gerente").addEventListener("change",()=>{try{localStorage.setItem(KEY+"-gerente",$("gerente").value.trim())}catch(e){}});
+const fmtC=iso=>iso.split("-").reverse().join("/");
+function relatorio(){
+  const l=[...items].sort((a,b)=>a.data<b.data?-1:a.data>b.data?1:0);
+  const periodo=l.length?fmtC(l[0].data)+" a "+fmtC(l[l.length-1].data):"";
+  let t="Prezado(a),\n\nSegue o relatório das atividades da semana"+(periodo?" ("+periodo+")":"")+".\n\n";
+  l.forEach(i=>{t+=fmtC(i.data)+" - "+STATUS[i.status]+"\n"+i.desc+"\nSolicitante: "+(i.solicitante||"-")+" | Setor: "+(i.setor||"-")+"\n\n"});
+  const n=s=>l.filter(i=>i.status===s).length;
+  t+="Resumo: "+l.length+" atividades ("+n("concluida")+" concluídas, "+n("andamento")+" em andamento, "+n("pendente")+" pendentes).\n\nAtenciosamente.";
+  return t;
+}
+function aviso(m){$("msg").textContent=m}
+async function copiar(t){try{await navigator.clipboard.writeText(t);return true}catch(e){return false}}
+$("enviar").onclick=async()=>{
+  if(!items.length){aviso("Adicione ao menos uma atividade para gerar o relatório.");return}
+  const to=$("gerente").value.trim(),assunto="Relatório de atividades da semana",corpo=relatorio();
+  let href="mailto:"+to+"?subject="+encodeURIComponent(assunto)+"&body="+encodeURIComponent(corpo);
+  let msg="E-mail criado no seu aplicativo de e-mail.";
+  if(href.length>1800){
+    const ok=await copiar(corpo);
+    href="mailto:"+to+"?subject="+encodeURIComponent(assunto)+"&body="+encodeURIComponent("Cole aqui o relatório (copiado automaticamente).");
+    msg=ok?"Relatório longo: copiado. Cole no corpo do e-mail (Ctrl+V).":"Relatório longo: use o botão Copiar relatório e cole no e-mail.";
+  }
+  window.open(href,"_blank");aviso(msg);
+};
+$("copiar").onclick=async()=>{
+  if(!items.length){aviso("Adicione ao menos uma atividade para gerar o relatório.");return}
+  aviso(await copiar(relatorio())?"Relatório copiado.":"Não foi possível copiar automaticamente.");
+};
+const csvCell=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+function toCSV(){
+  const rows=["data;descricao;status;solicitante;setor"];
+  [...items].sort((a,b)=>a.data<b.data?-1:a.data>b.data?1:0).forEach(i=>rows.push([i.data,i.desc,STATUS[i.status],i.solicitante,i.setor].map(csvCell).join(";")));
+  return "\ufeff"+rows.join("\r\n");
+}
+function parseCSV(txt){
+  txt=txt.replace(/^\ufeff/,"");
+  const sep=(txt.split(/\r?\n/)[0]||"").includes(";")?";":",";
+  const rows=[];let r=[],c="",q=false;
+  for(let k=0;k<txt.length;k++){
+    const ch=txt[k];
+    if(q){if(ch==='"'){if(txt[k+1]==='"'){c+='"';k++}else q=false}else c+=ch}
+    else if(ch==='"')q=true;
+    else if(ch===sep){r.push(c);c=""}
+    else if(ch==="\n"){r.push(c);rows.push(r);r=[];c=""}
+    else if(ch!=="\r")c+=ch;
+  }
+  if(c!==""||r.length){r.push(c);rows.push(r)}
+  return rows;
+}
+function normData(s){s=(s||"").trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);return m?m[3]+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0"):""}
+function normStatus(s){s=(s||"").trim().toLowerCase();for(const [k,v] of Object.entries(STATUS)){if(s===k||s===v.toLowerCase())return k}return "pendente"}
+const msgCsv=m=>{$("msgCsv").textContent=m};
+$("expCsv").onclick=()=>{
+  if(!items.length){msgCsv("Adicione ao menos uma atividade para salvar.");return}
+  const blob=new Blob([toCSV()],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="atividades-semanais.csv";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  msgCsv("Arquivo atividades-semanais.csv gerado.");
+};
+$("impCsv").onclick=()=>$("fileCsv").click();
+$("fileCsv").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{
+    const rows=parseCSV(await f.text());
+    const key=i=>[i.data,i.desc,i.solicitante,i.setor].join("|");
+    const have=new Set(items.map(key));let add=0,skip=0;
+    rows.slice(1).forEach(c=>{
+      const it={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),data:normData(c[0]),desc:(c[1]||"").trim(),status:normStatus(c[2]),solicitante:(c[3]||"").trim(),setor:(c[4]||"").trim()};
+      if(!it.data||!it.desc){skip++;return}
+      if(have.has(key(it))){skip++;return}
+      have.add(key(it));items.push(it);add++;
+    });
+    save();render();
+    msgCsv(add+" atividade(s) carregada(s)"+(skip?", "+skip+" ignorada(s) (repetidas ou incompletas).":"."));
+  }catch(err){msgCsv("Não foi possível ler o arquivo CSV.")}
+  e.target.value="";
+};
+render();
+</script>
+</body>
+</html>
